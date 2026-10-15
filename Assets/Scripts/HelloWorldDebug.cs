@@ -3,8 +3,17 @@ using UnityEngine;
 
 public class HelloWorldDebug : MonoBehaviour
 {
-    void Start()
+   
+
+    void OnEnable()
     {
         Debug.Log("Hello World");
+
+    }
+
+     void OnDisable()
+    {
+        Debug.Log("Goodbye World");
+
     }
 }
