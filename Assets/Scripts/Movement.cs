@@ -17,6 +17,9 @@ public class PlayerMovement : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody>();
+
+        // Prevent physics from tipping the player over
+        rb.constraints = RigidbodyConstraints.FreezeRotation;
     }
 
     void Update()
@@ -27,8 +30,8 @@ public class PlayerMovement : MonoBehaviour
         Vector3 forward = cameraTransform.forward;
         Vector3 right = cameraTransform.right;
 
-        forward.y = 0;
-        right.y = 0;
+        forward.y = 0f;
+        right.y = 0f;
 
         forward.Normalize();
         right.Normalize();
@@ -49,21 +52,32 @@ public class PlayerMovement : MonoBehaviour
             movement.z * moveSpeed
         );
 
-        if (movement.magnitude > 0.1f)
+        // Make the player model face the camera's direction
+        if (playerModel != null && cameraTransform != null)
         {
-            Quaternion targetRotation =
-                Quaternion.LookRotation(movement);
+            Vector3 lookDirection = cameraTransform.forward;
+            lookDirection.y = 0f;
 
-            playerModel.rotation = Quaternion.Slerp(
-                playerModel.rotation,
-                targetRotation,
-                rotationSpeed * Time.fixedDeltaTime
-            );
+            if (lookDirection.sqrMagnitude > 0.001f)
+            {
+                Quaternion targetRotation =
+                    Quaternion.LookRotation(lookDirection);
+
+                playerModel.rotation = Quaternion.Slerp(
+                    playerModel.rotation,
+                    targetRotation,
+                    rotationSpeed * Time.fixedDeltaTime
+                );
+            }
         }
 
         if (jumpRequested)
         {
-            rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+            rb.AddForce(
+                Vector3.up * jumpForce,
+                ForceMode.Impulse
+            );
+
             jumpRequested = false;
             grounded = false;
         }
